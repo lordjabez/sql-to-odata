@@ -144,7 +144,7 @@ with open('pyproject.toml') as project_file:
 
 
 _test_sqlite_url = 'https://www.sqlitetutorial.net/wp-content/uploads/2018/03/chinook.zip'
-_test_sqlite_zip = zipfile.ZipFile(io.BytesIO(requests.get(_test_sqlite_url).content))
+_test_sqlite_zip = zipfile.ZipFile(io.BytesIO(requests.get(_test_sqlite_url, timeout=10).content))
 with _test_sqlite_zip.open('chinook.db') as zip_file:
     with open(_test_sqlite_filename, 'wb') as database_file:
         database_file.write(zip_file.read())
