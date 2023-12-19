@@ -90,7 +90,7 @@ class ODataInterface():
         # Prevents SQL injection by validating parameter against list of table names
         if table_name not in table_names:
             raise ValueError(f'Table not found: {table_name}')
-        query = f'''SELECT * FROM {table_name}'''
+        query = f'''SELECT * FROM {table_name}'''  # nosec - this is safe because of the prior check
         rows = self._execute_query(query)
         schema = self.get_table_schema(table_name)
         field_names = [f[0] for f in schema]
