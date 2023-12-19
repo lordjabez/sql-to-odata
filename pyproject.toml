@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "sql-to-odata"
+description = "Tools to facilitate adding an OData interface in front of a SQL database."
+version = "0.0.0"
+license = "MIT-0"
+authors = ["Judson Neer <judson.neer@gmail.com>"]
+repository = "https://github.com/lordjabez/sql-to-odata"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.8.1 <3.13"
+
+[tool.poetry.dev-dependencies]
+bandit = "^1.7.6"
+flake8 = "^6.1.0"
+pytest = "^7.4.3"
+pytest-cov = "^4.1.0"
+safety = "^2.3.5"
+toml = "^0.10.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
