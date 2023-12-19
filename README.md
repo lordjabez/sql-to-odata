@@ -28,3 +28,8 @@ import sql_to_odata
 ```
 
 TODO write usage description here
+
+
+## References
+
+*  https://www.sqlitetutorial.net/sqlite-sample-database/
