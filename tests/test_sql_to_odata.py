@@ -208,6 +208,13 @@ def test_datatype_mappings():
     assert error.value.args[0] == 'Unknown data type: does-not-exist'
 
 
+def test_missing_database_parameter():
+    with pytest.raises(KeyError) as error:
+        odata_interface = sql_to_odata.ODataInterface()
+        odata_interface.get_table_names()
+    assert error.value.args[0] == 'sqlite_filename'
+
+
 def test_missing_database_file():
     with pytest.raises(sqlite3.OperationalError) as error:
         odata_interface = sql_to_odata.ODataInterface(domain_name=_test_domain_name, sqlite_filename='does-not-exist')
