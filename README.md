@@ -24,7 +24,10 @@ Basic usage is as follows:
 ```python3
 import sql_to_odata
 
-# TODO
+odata_interface = sql_to_odata.ODataInterface(domain_name='example.com', sqlite_filename='my.db')
+
+schema_xml = odata_interface.get_database_schema_xml()
+table_json = odata_interface.get_table_json('mytable')
 ```
 
 TODO write usage description here
