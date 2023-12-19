@@ -9,7 +9,6 @@ import toml
 import sql_to_odata
 
 
-_test_domain_name = 'example.com'
 _test_sqlite_filename = 'tests/test.db'
 
 _test_table_names = [
@@ -134,8 +133,8 @@ _test_database_schema_xml = '''<?xml version="1.0" encoding="utf-8"?>
 
 _test_table_row_count = 347
 
-_test_table_json_length = 22373
-_test_table_json_length_formatted = 43211
+_test_table_json_length = 22353
+_test_table_json_length_formatted = 43191
 
 
 with open('pyproject.toml') as project_file:
@@ -143,6 +142,7 @@ with open('pyproject.toml') as project_file:
     _test_version = _test_project['tool']['poetry']['version']
 
 
+# TODO: replace with a custom loaded test database that covers more data types etc
 _test_sqlite_url = 'https://www.sqlitetutorial.net/wp-content/uploads/2018/03/chinook.zip'
 _test_sqlite_zip = zipfile.ZipFile(io.BytesIO(requests.get(_test_sqlite_url, timeout=10).content))
 with _test_sqlite_zip.open('chinook.db') as zip_file:
@@ -150,7 +150,7 @@ with _test_sqlite_zip.open('chinook.db') as zip_file:
         database_file.write(zip_file.read())
 
 
-_odata_interface = sql_to_odata.ODataInterface(domain_name=_test_domain_name, sqlite_filename=_test_sqlite_filename)
+_odata_interface = sql_to_odata.ODataInterface(sqlite_filename=_test_sqlite_filename)
 
 
 def test_version():
@@ -217,14 +217,14 @@ def test_missing_database_parameter():
 
 def test_missing_database_file():
     with pytest.raises(sqlite3.OperationalError) as error:
-        odata_interface = sql_to_odata.ODataInterface(domain_name=_test_domain_name, sqlite_filename='does-not-exist')
+        odata_interface = sql_to_odata.ODataInterface(sqlite_filename='does-not-exist')
         odata_interface.get_table_names()
     assert error.value.args[0] == 'unable to open database file'
 
 
 def test_bad_database_file():
     with pytest.raises(sqlite3.DatabaseError) as error:
-        odata_interface = sql_to_odata.ODataInterface(domain_name=_test_domain_name, sqlite_filename='README.md')
+        odata_interface = sql_to_odata.ODataInterface(sqlite_filename='README.md')
         odata_interface.get_table_names()
     assert error.value.args[0] == 'file is not a database'
 

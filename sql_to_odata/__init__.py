@@ -98,7 +98,7 @@ class ODataInterface():
 
     def get_table_json(self, table_name, formatted=False):
         """TODO"""
-        odata_context_url = f'{self._metadata_url}#{table_name}'
+        odata_context_url = f'$metadata#{table_name}'
         table_rows = self.get_table_rows(table_name)
         table_json = {'@odata.context': odata_context_url, 'value': table_rows}
         if formatted:
@@ -108,8 +108,6 @@ class ODataInterface():
 
     def __init__(self, *args, **kwargs):
         """Construct an instance of the class."""
-        domain_name = kwargs['domain_name']
         sqlite_filename = kwargs['sqlite_filename']
         sqlite_uri = f'file:{sqlite_filename}?mode=ro'
         self._connection = sqlite3.connect(sqlite_uri, uri=True)
-        self._metadata_url = f'https://{domain_name}/$metadata'
