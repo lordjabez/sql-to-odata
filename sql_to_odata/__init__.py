@@ -1,5 +1,7 @@
-import json
+import os
 import sqlite3
+
+import ujson
 
 
 __version__ = '0.0.0'
@@ -102,9 +104,23 @@ class ODataInterface():
         table_rows = self.get_table_rows(table_name)
         table_json = {'@odata.context': odata_context_url, 'value': table_rows}
         if formatted:
-            return json.dumps(table_json, indent=4)
+            return ujson.dumps(table_json, indent=4)
         else:
-            return json.dumps(table_json, separators=(',', ':'))
+            return ujson.dumps(table_json, separators=(',', ':'))
+
+    def dump_database(self, folder, formatted=False):
+        """TODO"""
+        os.makedirs(folder, exist_ok=True)
+        schema_filename = os.path.join(folder, '$metadata')
+        schema_xml = self.get_database_schema_xml()
+        with open(schema_filename, 'w') as schema_file:
+            schema_file.write(schema_xml)
+        table_names = self.get_table_names()
+        for table_name in table_names:
+            table_filename = os.path.join(folder, table_name)
+            table_json = self.get_table_json(table_name, formatted)
+            with open(table_filename, 'w') as table_file:
+                table_file.write(table_json)
 
     def __init__(self, *args, **kwargs):
         """Construct an instance of the class."""

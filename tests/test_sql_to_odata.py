@@ -1,5 +1,8 @@
+import hashlib
 import io
+import os
 import sqlite3
+import tempfile
 import zipfile
 
 import pytest
@@ -136,6 +139,8 @@ _test_table_row_count = 347
 _test_table_json_length = 22353
 _test_table_json_length_formatted = 43191
 
+_test_dump_database_hash = '5036073489b10f2b064add92a4c2518a12a006753d1bd557a88580810c9eca19'
+
 
 with open('pyproject.toml') as project_file:
     _test_project = toml.load(project_file)
@@ -192,6 +197,19 @@ def test_get_table_json():
     assert len(table_json) == _test_table_json_length
     table_json = _odata_interface.get_table_json(_test_table_name, formatted=True)
     assert len(table_json) == _test_table_json_length_formatted
+
+
+def test_dump_database():
+    with tempfile.TemporaryDirectory() as temp_folder:
+        _odata_interface.dump_database(temp_folder)
+        output_filenames = sorted(os.listdir(temp_folder))
+        assert output_filenames == ['$metadata'] + _test_table_names
+        output_filenames = [os.path.join(temp_folder, f) for f in output_filenames]
+        output_hash = hashlib.sha256()
+        for output_filename in output_filenames:
+            with open(output_filename) as output_file:
+                output_hash.update(output_file.read().encode())
+        assert output_hash.hexdigest() == _test_dump_database_hash
 
 
 def test_datatype_mappings():
