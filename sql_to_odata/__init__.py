@@ -1,3 +1,4 @@
+import logging
 import os
 import sqlite3
 
@@ -5,6 +6,10 @@ import ujson
 
 
 __version__ = '0.0.0'
+
+
+_log = logging.getLogger(__name__)
+_log.addHandler(logging.NullHandler())
 
 
 class ODataInterface():
@@ -41,6 +46,7 @@ class ODataInterface():
 
         :return: List of table names in sorted order
         """
+        _log.debug('Fetching all table names')
         query = '''SELECT name FROM sqlite_schema WHERE type ='table' AND name NOT LIKE 'sqlite_%';'''
         rows = self._connection.execute(query)
         return sorted(r[0] for r in rows)
@@ -52,6 +58,7 @@ class ODataInterface():
         :param table_name: Name of the table whose schema should be fetched
         :return: List of tuples of schema info: (name, odata_type, is_nullable, default_value, is_primary_key)
         """
+        _log.debug(f'Fetching table schema from {table_name}')
         query = '''SELECT * FROM pragma_table_info(?);'''
         rows = self._connection.execute(query, [table_name])
         return [(r[1], ODataInterface.datatype_to_odata(r[2]), r[3] == 1, r[4], r[5] == 1) for r in rows]
@@ -63,6 +70,7 @@ class ODataInterface():
         :param table_name: Name of the table whose schema should be fetched
         :return: OData metadata fragment as an XML string
         """
+        _log.debug(f'Fetching table schema from {table_name}')
         schema = self.get_table_schema(table_name)
         xml_lines = []
         xml_lines.append(f'<EntityType Name="{table_name}">')
@@ -78,6 +86,7 @@ class ODataInterface():
         :return: Dictionary of schemas, where the keys are the table names and the
                  values are schema tuples as defined in the get_table_schema function.
         """
+        _log.debug('Fetching all database table schemas')
         return {t: self.get_table_schema(t) for t in self.get_table_names()}
 
     def get_database_schema_xml(self):
@@ -86,6 +95,7 @@ class ODataInterface():
 
         :return: OData metadata as an XML string
         """
+        _log.debug('Creating OData metadata XML')
         table_names = self.get_table_names()
         xml_lines = []
         xml_lines.append('<?xml version="1.0" encoding="utf-8"?>')
@@ -106,6 +116,7 @@ class ODataInterface():
         :param table_name: Name of the table to be fetched
         :return: List of rows each of which is a dictionary of field name / value pairs
         """
+        _log.debug(f'Fetching all rows of table {table_name}')
         table_names = self.get_table_names()
         # Prevents SQL injection by validating parameter against list of table names
         if table_name not in table_names:
@@ -124,6 +135,7 @@ class ODataInterface():
         :param formatted: JSON output is formatted with indentation, defaults to false
         :return: JSON-formatted rows and an OData context header pointing to metadata
         """
+        _log.debug(f'Fetching all rows of table {table_name} in JSON format')
         odata_context_url = f'$metadata#{table_name}'
         table_rows = self.get_table_rows(table_name)
         table_json = {'@odata.context': odata_context_url, 'value': table_rows}
@@ -132,22 +144,23 @@ class ODataInterface():
         else:
             return ujson.dumps(table_json, separators=(',', ':'))
 
-    def dump_database(self, folder, formatted=False):
+    def dump_database(self, folder_name, formatted=False):
         """
         Create a metadata file for the database schemas and a JSON file for
         each table, suitable for creating an OData-compatible API endpoint.
 
-        :param folder: Location to store output files
+        :param folder_name: Location to store output files
         :param formatted: JSON output is formatted with indentation, defaults to false
         """
-        os.makedirs(folder, exist_ok=True)
-        schema_filename = os.path.join(folder, '$metadata')
+        _log.debug(f'Dumping entire database to {folder_name}')
+        os.makedirs(folder_name, exist_ok=True)
+        schema_filename = os.path.join(folder_name, '$metadata')
         schema_xml = self.get_database_schema_xml()
         with open(schema_filename, 'w') as schema_file:
             schema_file.write(schema_xml)
         table_names = self.get_table_names()
         for table_name in table_names:
-            table_filename = os.path.join(folder, table_name)
+            table_filename = os.path.join(folder_name, table_name)
             table_json = self.get_table_json(table_name, formatted)
             with open(table_filename, 'w') as table_file:
                 table_file.write(table_json)
@@ -157,3 +170,4 @@ class ODataInterface():
         sqlite_filename = kwargs['sqlite_filename']
         sqlite_uri = f'file:{sqlite_filename}?mode=ro'
         self._connection = sqlite3.connect(sqlite_uri, uri=True)
+        _log.debug(f'Opened read-only connection to database at {sqlite_filename}')
