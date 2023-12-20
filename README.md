@@ -9,7 +9,7 @@ This Python package provides tools to facilitate adding an OData interface in fr
 database. It currently only supports extracting SQLite table schemas and data in their entirety
 into static files, which can then be hosted on a website or otherwise provided to OData consumers.
 
-It was initially built to create data that could be consumed on [Tableau Public](https://public.tableau.com/).
+It was initially built to create data that can be consumed on [Tableau Public](https://public.tableau.com/).
 
 
 ## Prerequisites
