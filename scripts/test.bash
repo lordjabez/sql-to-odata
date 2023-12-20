@@ -10,3 +10,6 @@ bandit -r sql_to_odata
 bandit -s B101 -r tests
 
 # safety check --full-report
+
+echo
+echo "All tests passed successfully!"
