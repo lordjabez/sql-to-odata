@@ -79,6 +79,23 @@ class ODataInterface():
         xml_lines.append('</EntityType>')
         return '\n'.join(xml_lines)
 
+    def get_database_service_json(self, tables_to_include=None, formatted=False):
+        """
+        Create an OData service document for the database.
+
+        :param tables_to_include: Optional list of tables to include in the document, defaults to all
+        :param formatted: JSON output is formatted with indentation, defaults to false
+        :return: OData service document in JSON format
+        """
+        _log.debug('Creating OData service document for database')
+        table_names = self.get_table_names() if tables_to_include is None else tables_to_include
+        service_json = {'@context': '$metadata'}
+        service_json['value'] = [{'name': t, 'kind': 'EntitySet', 'url': t} for t in table_names]
+        if formatted:
+            return ujson.dumps(service_json, indent=4)
+        else:
+            return ujson.dumps(service_json, separators=(',', ':'))
+
     def get_database_schema(self, tables_to_include=None):
         """
         Fetch the schemas for all tables in the database.
@@ -149,8 +166,8 @@ class ODataInterface():
 
     def dump_database(self, folder_name, tables_to_include=None, formatted=False):
         """
-        Create a metadata file for the database schemas and a JSON file for
-        each table, suitable for creating an OData-compatible API endpoint.
+        Create a service document, metadata file for the database schemas, and a JSON
+        file for each table, suitable for creating an OData-compatible API endpoint.
 
         :param folder_name: Location to store output files
         :param tables_to_include: Optional list of tables to include in dump, defaults to all
@@ -159,8 +176,12 @@ class ODataInterface():
         _log.debug(f'Dumping entire database to {folder_name}')
         table_names = self.get_table_names() if tables_to_include is None else tables_to_include
         os.makedirs(folder_name, exist_ok=True)
+        service_filename = os.path.join(folder_name, '$service')
+        service_json = self.get_database_service_json(tables_to_include)
         schema_filename = os.path.join(folder_name, '$metadata')
         schema_xml = self.get_database_schema_xml()
+        with open(service_filename, 'w') as service_file:
+            service_file.write(service_json)
         with open(schema_filename, 'w') as schema_file:
             schema_file.write(schema_xml)
         for table_name in table_names:

@@ -40,6 +40,10 @@ _test_table_schema_xml = '''<EntityType Name="albums">
 <Property Name="ArtistId" Type="Edm.Int64" />
 </EntityType>'''
 
+_test_service_json_length = 670
+_test_service_subset_json_length = 198
+_test_service_json_formatted_length = 1348
+
 _test_database_schema = {'albums': [('AlbumId', 'Edm.Int64', True, None, True), ('Title', 'Edm.String', True, None, False), ('ArtistId', 'Edm.Int64', True, None, False)], 'artists': [('ArtistId', 'Edm.Int64', True, None, True), ('Name', 'Edm.String', False, None, False)], 'customers': [('CustomerId', 'Edm.Int64', True, None, True), ('FirstName', 'Edm.String', True, None, False), ('LastName', 'Edm.String', True, None, False), ('Company', 'Edm.String', False, None, False), ('Address', 'Edm.String', False, None, False), ('City', 'Edm.String', False, None, False), ('State', 'Edm.String', False, None, False), ('Country', 'Edm.String', False, None, False), ('PostalCode', 'Edm.String', False, None, False), ('Phone', 'Edm.String', False, None, False), ('Fax', 'Edm.String', False, None, False), ('Email', 'Edm.String', True, None, False), ('SupportRepId', 'Edm.Int64', False, None, False)], 'employees': [('EmployeeId', 'Edm.Int64', True, None, True), ('LastName', 'Edm.String', True, None, False), ('FirstName', 'Edm.String', True, None, False), ('Title', 'Edm.String', False, None, False), ('ReportsTo', 'Edm.Int64', False, None, False), ('BirthDate', 'Edm.DateTimeOffset', False, None, False), ('HireDate', 'Edm.DateTimeOffset', False, None, False), ('Address', 'Edm.String', False, None, False), ('City', 'Edm.String', False, None, False), ('State', 'Edm.String', False, None, False), ('Country', 'Edm.String', False, None, False), ('PostalCode', 'Edm.String', False, None, False), ('Phone', 'Edm.String', False, None, False), ('Fax', 'Edm.String', False, None, False), ('Email', 'Edm.String', False, None, False)], 'genres': [('GenreId', 'Edm.Int64', True, None, True), ('Name', 'Edm.String', False, None, False)], 'invoice_items': [('InvoiceLineId', 'Edm.Int64', True, None, True), ('InvoiceId', 'Edm.Int64', True, None, False), ('TrackId', 'Edm.Int64', True, None, False), ('UnitPrice', 'Edm.Decimal', True, None, False), ('Quantity', 'Edm.Int64', True, None, False)], 'invoices': [('InvoiceId', 'Edm.Int64', True, None, True), ('CustomerId', 'Edm.Int64', True, None, False), ('InvoiceDate', 'Edm.DateTimeOffset', True, None, False), ('BillingAddress', 'Edm.String', False, None, False), ('BillingCity', 'Edm.String', False, None, False), ('BillingState', 'Edm.String', False, None, False), ('BillingCountry', 'Edm.String', False, None, False), ('BillingPostalCode', 'Edm.String', False, None, False), ('Total', 'Edm.Decimal', True, None, False)], 'media_types': [('MediaTypeId', 'Edm.Int64', True, None, True), ('Name', 'Edm.String', False, None, False)], 'playlist_track': [('PlaylistId', 'Edm.Int64', True, None, True), ('TrackId', 'Edm.Int64', True, None, False)], 'playlists': [('PlaylistId', 'Edm.Int64', True, None, True), ('Name', 'Edm.String', False, None, False)], 'tracks': [('TrackId', 'Edm.Int64', True, None, True), ('Name', 'Edm.String', True, None, False), ('AlbumId', 'Edm.Int64', False, None, False), ('MediaTypeId', 'Edm.Int64', True, None, False), ('GenreId', 'Edm.Int64', False, None, False), ('Composer', 'Edm.String', False, None, False), ('Milliseconds', 'Edm.Int64', True, None, False), ('Bytes', 'Edm.Int64', False, None, False), ('UnitPrice', 'Edm.Decimal', True, None, False)]}  # noqa: E501
 _test_database_subset_schema = {k: v for k, v in _test_database_schema.items() if k in _test_table_subset_names}
 
@@ -174,9 +178,9 @@ _test_table_row_count = 347
 _test_table_json_length = 22353
 _test_table_json_length_formatted = 43191
 
-_test_dump_database_hash = '5036073489b10f2b064add92a4c2518a12a006753d1bd557a88580810c9eca19'
-_test_dump_database_subset_hash = '050b86478a66d290e68096dbba3864468065e2482f94a064d04d3ad1512e26e3'
-_test_dump_database_formatted_hash = '7fdebdbdf3b4dc8e389a0203305ec7dbbe966a26421b767c176324c71e13f4b2'
+_test_dump_database_hash = '1bacd895dd83151d1ef3b16c23218da1d1c96b21bdac86bdd88d3e91c9fa3d13'
+_test_dump_database_subset_hash = '6efe6330b4f62867f8aad48b491b8eeefca121b4e53fc699a12e1fdc9a1be607'
+_test_dump_database_formatted_hash = 'c283182079b8c34ad1782bf42356bbb511c10737d0732d1bfb17fd58b4bbfb28'
 
 
 with open('pyproject.toml') as project_file:
@@ -214,6 +218,15 @@ def test_get_table_schema_xml():
     assert table_schema_xml == _test_table_schema_xml
 
 
+def test_get_database_service_json():
+    service_json = _odata_interface.get_database_service_json()
+    assert len(service_json) == _test_service_json_length
+    service_json = _odata_interface.get_database_service_json(tables_to_include=_test_table_subset_names)
+    assert len(service_json) == _test_service_subset_json_length
+    service_json = _odata_interface.get_database_service_json(formatted=True)
+    assert len(service_json) == _test_service_json_formatted_length
+
+
 def test_get_database_schema():
     database_schema = _odata_interface.get_database_schema()
     assert database_schema == _test_database_schema
@@ -244,7 +257,7 @@ def test_dump_database():
     with tempfile.TemporaryDirectory() as temp_folder:
         _odata_interface.dump_database(temp_folder)
         output_filenames = sorted(os.listdir(temp_folder))
-        assert output_filenames == ['$metadata'] + _test_table_names
+        assert output_filenames == ['$metadata', '$service'] + _test_table_names
         output_filenames = [os.path.join(temp_folder, f) for f in output_filenames]
         output_hash = hashlib.sha256()
         for output_filename in output_filenames:
@@ -254,7 +267,7 @@ def test_dump_database():
     with tempfile.TemporaryDirectory() as temp_folder:
         _odata_interface.dump_database(temp_folder, tables_to_include=_test_table_subset_names)
         output_filenames = sorted(os.listdir(temp_folder))
-        assert output_filenames == ['$metadata'] + _test_table_subset_names
+        assert output_filenames == ['$metadata', '$service'] + _test_table_subset_names
         output_filenames = [os.path.join(temp_folder, f) for f in output_filenames]
         output_hash = hashlib.sha256()
         for output_filename in output_filenames:
@@ -264,7 +277,7 @@ def test_dump_database():
     with tempfile.TemporaryDirectory() as temp_folder:
         _odata_interface.dump_database(temp_folder, formatted=True)
         output_filenames = sorted(os.listdir(temp_folder))
-        assert output_filenames == ['$metadata'] + _test_table_names
+        assert output_filenames == ['$metadata', '$service'] + _test_table_names
         output_filenames = [os.path.join(temp_folder, f) for f in output_filenames]
         output_hash = hashlib.sha256()
         for output_filename in output_filenames:
