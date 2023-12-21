@@ -79,24 +79,27 @@ class ODataInterface():
         xml_lines.append('</EntityType>')
         return '\n'.join(xml_lines)
 
-    def get_database_schema(self):
+    def get_database_schema(self, tables_to_include=None):
         """
         Fetch the schemas for all tables in the database.
 
+        :param tables_to_include: Optional list of tables to include in schema, defaults to all
         :return: Dictionary of schemas, where the keys are the table names and the
                  values are schema tuples as defined in the get_table_schema function.
         """
         _log.debug('Fetching all database table schemas')
-        return {t: self.get_table_schema(t) for t in self.get_table_names()}
+        table_names = self.get_table_names() if tables_to_include is None else tables_to_include
+        return {t: self.get_table_schema(t) for t in table_names}
 
-    def get_database_schema_xml(self):
+    def get_database_schema_xml(self, tables_to_include=None):
         """
         Create an OData metadata file for the database in XML format.
 
+        :param tables_to_include: Optional list of tables to include in schema, defaults to all
         :return: OData metadata as an XML string
         """
         _log.debug('Creating OData metadata XML')
-        table_names = self.get_table_names()
+        table_names = self.get_table_names() if tables_to_include is None else tables_to_include
         xml_lines = []
         xml_lines.append('<?xml version="1.0" encoding="utf-8"?>')
         xml_lines.append('<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">')
@@ -144,21 +147,22 @@ class ODataInterface():
         else:
             return ujson.dumps(table_json, separators=(',', ':'))
 
-    def dump_database(self, folder_name, formatted=False):
+    def dump_database(self, folder_name, tables_to_include=None, formatted=False):
         """
         Create a metadata file for the database schemas and a JSON file for
         each table, suitable for creating an OData-compatible API endpoint.
 
         :param folder_name: Location to store output files
+        :param tables_to_include: Optional list of tables to include in dump, defaults to all
         :param formatted: JSON output is formatted with indentation, defaults to false
         """
         _log.debug(f'Dumping entire database to {folder_name}')
+        table_names = self.get_table_names() if tables_to_include is None else tables_to_include
         os.makedirs(folder_name, exist_ok=True)
         schema_filename = os.path.join(folder_name, '$metadata')
         schema_xml = self.get_database_schema_xml()
         with open(schema_filename, 'w') as schema_file:
             schema_file.write(schema_xml)
-        table_names = self.get_table_names()
         for table_name in table_names:
             table_filename = os.path.join(folder_name, table_name)
             table_json = self.get_table_json(table_name, formatted)

@@ -28,18 +28,21 @@ Basic usage is as follows:
 ```python3
 import sql_to_odata
 
-odata_interface = sql_to_odata.ODataInterface(sqlite_filename='database.db')
+odata_interface = sql_to_odata.ODataInterface(sqlite_filename='stuff.db')
 
 # Extracts the schema for all tables in XML format
 schema_xml = odata_interface.get_database_schema_xml()
 
 # Extracts the data from a single table in JSON format
-table_json = odata_interface.get_table_json('my_table')
+table_json = odata_interface.get_table_json('people')
 
 # Dumps the schemas and all tables to a folder, with the schema
 # file named "$metadata" and data files named after the tables;
 # this output format can be directly served on a website
 odata_interface.dump_database('/path/to/output')
+
+# Dump only a portion of the tables in the database
+odata_interface.dump_database('/path/to/output', tables_to_include=['people', 'places', 'things'])
 ```
 
 Run `help(sql_to_odata)` to get more information on the available functions.
