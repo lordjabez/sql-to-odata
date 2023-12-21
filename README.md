@@ -48,6 +48,8 @@ Run `help(sql_to_odata)` to get more information on the available functions.
 ## To-Do
 
 *  Translate settings for nullable fields, default values, and primary keys
+*  Create a test database that includes more variety of stuff, esp around datatypes
+*  Add tests to ensure mapping of dates and times works (esp since OData requires a TZ-aware datetime)
 *  Add support for more source databases
 
 
