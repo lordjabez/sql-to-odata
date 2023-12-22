@@ -70,7 +70,7 @@ class ODataInterface():
         :param table_name: Name of the table whose schema should be fetched
         :return: OData metadata fragment as an XML string
         """
-        _log.debug(f'Fetching table schema from {table_name}')
+        _log.debug(f'Creating table schema XML from {table_name}')
         schema = self.get_table_schema(table_name)
         xml_lines = []
         xml_lines.append(f'<EntityType Name="{table_name}">')
@@ -115,7 +115,7 @@ class ODataInterface():
         :param tables_to_include: Optional list of tables to include in schema, defaults to all
         :return: OData metadata as an XML string
         """
-        _log.debug('Creating OData metadata XML')
+        _log.debug('Creating OData metadata XML for database')
         table_names = self.get_table_names() if tables_to_include is None else tables_to_include
         xml_lines = []
         xml_lines.append('<?xml version="1.0" encoding="utf-8"?>')
@@ -173,7 +173,7 @@ class ODataInterface():
         :param tables_to_include: Optional list of tables to include in dump, defaults to all
         :param formatted: JSON output is formatted with indentation, defaults to false
         """
-        _log.debug(f'Dumping entire database to {folder_name}')
+        _log.debug(f'Dumping database to {folder_name}')
         table_names = self.get_table_names() if tables_to_include is None else tables_to_include
         os.makedirs(folder_name, exist_ok=True)
         service_filename = os.path.join(folder_name, '$service')
